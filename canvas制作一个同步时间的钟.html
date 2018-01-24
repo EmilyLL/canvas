@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- <style>
+        canvas {
+            border: 1px solid red;
+        }
+    </style> -->
+</head>
+
+<body>
+    <canvas width="600" height="600"></canvas>
+    <script>
+        /*
+        需求：
+            1、实现手表的指针动态效果
+            2、同步当前时间
+        */
+        var canvas = document.querySelector('canvas');
+        var ctx = canvas.getContext('2d');
+
+        //同步当前时间
+        var time = new Date();
+        var h1 = time.getHours();
+        var nowM = time.getMinutes();
+        var nowS = time.getSeconds();
+        // console.log(h1,nowM,nowS);
+        var hh = h1 > 12 ? (h1 - 12) : h1;
+        var nowH = hh;
+
+        var s = nowS; //控制秒针
+        var m = nowM;//控制分针
+        var h = nowH;//控制时针
+        // var s=0;
+        // var m=0;
+        // var h=0;
+
+        //初始化存在一个，定时器开始前页面不能空白
+        ctx.beginPath();
+        var x0 = ctx.canvas.width / 2;
+        var y0 = ctx.canvas.height / 2;
+        var radius = 200;
+        ctx.arc(x0, y0, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        //画时间
+        ctx.beginPath();
+        //先画线
+        var len = 5;
+        var space = 15;
+        for (index = 1; index <= 12; index++) {
+            var timeAngle = 2 * Math.PI / 12 * -index - Math.PI;
+            var startX = x0 + radius * Math.cos(timeAngle);
+            var startY = y0 + radius * Math.sin(timeAngle);
+            var endX = startX - len * Math.cos(timeAngle);
+            var endY = startY - len * Math.sin(timeAngle);
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = 'orange';
+            ctx.lineCap='round';
+
+            //标记时间               
+            var num = index;
+            var numX = x0 + (radius - space - len) * Math.sin(timeAngle);
+            var numY = y0 + (radius - space - len) * Math.cos(timeAngle);
+            ctx.font = '20px microsoft yahei';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'blue';
+            ctx.fillText(num, numX, numY);
+            ctx.stroke();
+        }
+
+
+
+        //2、画指针
+
+        //秒针      
+        ctx.beginPath();
+        ctx.strokeStyle = 'green';
+        var length = (radius + 10) * Math.cos(Math.PI / 4);
+        var angle = (s - 15) * Math.PI * 2 / 60;
+        var y1 = x0 + length * Math.sin(angle);
+        var x1 = y0 + length * Math.cos(angle);
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.lineWidth = 6;
+        ctx.lineCap='round';
+        ctx.stroke();
+
+        //分针     
+        ctx.beginPath();
+        ctx.strokeStyle = 'black';
+        var length = (radius - 30) * Math.cos(Math.PI / 4);
+        var angle = (m - 15) * Math.PI * 2 / 60;
+        var y1 = x0 + length * Math.sin(angle);
+        var x1 = y0 + length * Math.cos(angle);
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.lineWidth = 6;
+        ctx.lineCap='round';
+        ctx.stroke();
+
+        //时针   
+        ctx.beginPath();
+        ctx.strokeStyle = 'red';
+        var length = (radius - 100) * Math.cos(Math.PI / 4);
+        var angleH1 = (h - 3) * Math.PI * 2 / 12;
+        var angleH2 = m / 60 * Math.PI * 2 / 12;
+        var angleH = angleH1 + angleH2;
+        var yH1 = x0 + length * Math.sin(angleH);
+        var xH1 = y0 + length * Math.cos(angleH);
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(xH1, yH1);
+        ctx.lineWidth = 6;
+        ctx.lineCap='round';
+        ctx.stroke();
+
+        //画圆心
+        ctx.beginPath();
+        ctx.arc(x0, y0, 10, 0, Math.PI * 2);
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+
+
+
+        //定时器，实现动态指针
+        setInterval(function () {
+
+            // ctx.clearRect(x0-length,y0-length,2*length,2*length);
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            //秒针每次刷新都同步当前时间，校准秒、分、时针。
+            var time = new Date();
+            var h1 = time.getHours();
+            var nowM = time.getMinutes();
+            var nowS = time.getSeconds();
+            console.log(h1, nowM, nowS);
+            var hh = h1 > 12 ? (h1 - 12) : h1;
+            var nowH = hh;
+
+            var s = nowS; //控制秒针
+            var m = nowM;//控制分针
+            var h = nowH;//控制时针
+
+            //1、画圆、画出中心点
+            ctx.beginPath();
+            var x0 = ctx.canvas.width / 2;
+            var y0 = ctx.canvas.height / 2;
+            var radius = 200;
+            ctx.arc(x0, y0, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 6;
+            ctx.stroke();
+
+            //画时间
+            ctx.beginPath();
+            //先画线
+            var len = 5;
+            var space = 15;
+            for (index = 1; index <= 12; index++) {
+                var timeAngle = 2 * Math.PI / 12 * -index - Math.PI;
+                var startX = x0 + radius * Math.cos(timeAngle);
+                var startY = y0 + radius * Math.sin(timeAngle);
+                var endX = startX - len * Math.cos(timeAngle);
+                var endY = startY - len * Math.sin(timeAngle);
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                ctx.lineWidth = 6;
+                ctx.strokeStyle = 'orange';
+
+                //标记时间               
+                var num = index;
+                var numX = x0 + (radius - space - len) * Math.sin(timeAngle);
+                var numY = y0 + (radius - space - len) * Math.cos(timeAngle);
+                ctx.font = '20px microsoft yahei';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(num, numX, numY);
+                ctx.stroke();
+            }
+
+            //2、画指针
+
+            //秒针
+            ctx.beginPath();
+            ctx.strokeStyle = 'green';
+            var length = (radius + 10) * Math.cos(Math.PI / 4);
+            var angleS = (s - 15) * Math.PI * 2 / 60;
+            var yS1 = x0 + length * Math.sin(angleS);
+            var xS1 = y0 + length * Math.cos(angleS);
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(xS1, yS1);
+            ctx.lineWidth = 6;
+            ctx.lineCap='round';
+            ctx.stroke();
+
+            //分针
+            ctx.beginPath();
+            ctx.strokeStyle = 'black';
+            var length = (radius - 30) * Math.cos(Math.PI / 4);
+            var angleM = (m - 15) * Math.PI * 2 / 60;
+            var yM1 = x0 + length * Math.sin(angleM);
+            var xM1 = y0 + length * Math.cos(angleM);
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(xM1, yM1);
+            ctx.lineWidth = 6;
+            ctx.lineCap='round';
+            ctx.stroke();
+
+            //时针
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            var length = (radius - 100) * Math.cos(Math.PI / 4);
+            var angleH1 = (h - 3) * Math.PI * 2 / 12;//计算当前对应的h的角度
+            var angleH2 = m / 60 * Math.PI * 2 / 12; //通过当前分钟数，计算时针在该小时内的角度
+            var angleH = angleH1 + angleH2;
+            var yH1 = x0 + length * Math.sin(angleH);
+            var xH1 = y0 + length * Math.cos(angleH);
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(xH1, yH1);
+            ctx.lineWidth = 6;
+            ctx.lineCap='round';
+            ctx.stroke();
+
+            //画圆心
+            ctx.beginPath();
+            ctx.arc(x0, y0, 10, 0, Math.PI * 2);
+            ctx.fillStyle = 'blue';
+            ctx.fill();
+
+
+        }, 1000);
+
+    </script>
+</body>
+
+</html>
